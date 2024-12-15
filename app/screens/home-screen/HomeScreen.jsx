@@ -41,7 +41,7 @@ const HomeScreen = ({navigation}) => {
         <Icon name="event" size={30} color="#fff"/>
       </TouchableOpacity>
 
-      <JournalEntryButton/>
+      <JournalEntryButton navigation={navigation}/>
 
       <TouchableOpacity
         style={[styles.floatingButton, styles.rightButton]}

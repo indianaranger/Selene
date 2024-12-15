@@ -2,9 +2,9 @@ import React from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 
-const JournalEntryButton = () => {
+const JournalEntryButton = ({navigation}) => {
   return (
-    <TouchableOpacity style={styles.floatingButton} onPress={() => {}}>
+    <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.navigate('JournalEntry')}>
             <Text style={styles.floatingButtonText}>+</Text>
     </TouchableOpacity>
   )

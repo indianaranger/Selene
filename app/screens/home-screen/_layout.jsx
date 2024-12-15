@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './HomeScreen';
 import Screen2 from './Screen2';
 import JournalCalendar from './JournalCalender';
+import JournalEntryPage from './JournalEntryPage';
 
 const HomeStack = createNativeStackNavigator();
 
@@ -19,8 +20,8 @@ function HomeStackLayout() {
         component={JournalCalendar}
       />
       <HomeStack.Screen 
-        name="Screen2" 
-        component={Screen2}
+        name="JournalEntry" 
+        component={JournalEntryPage}
       />
     </HomeStack.Navigator>
   );
