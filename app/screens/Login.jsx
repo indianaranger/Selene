@@ -1,10 +1,11 @@
+// screens/Login.js
 import React, { useState } from 'react';
 import { View, TextInput, Button, ActivityIndicator, StyleSheet, KeyboardAvoidingView } from 'react-native';
-import { FIREBASE_AUTH, FIRESTORE_DB } from '@/FirebaseConfig'; // Assuming you have Firestore initialized here
+import { FIREBASE_AUTH, FIRESTORE_DB } from '@/FirebaseConfig';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore'; // Import Firestore functions
+import { doc, setDoc } from 'firebase/firestore';
 
-const Login = ({ navigation }) => {  // Added navigation prop here
+const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,8 +18,6 @@ const Login = ({ navigation }) => {  // Added navigation prop here
       const response = await signInWithEmailAndPassword(auth, email, password);
       console.log(response);
       alert('Login successful');
-      
-      const user = response.user;
     } catch (error) {
       console.error(error);
       alert('Sign-in failed');
@@ -33,7 +32,6 @@ const Login = ({ navigation }) => {  // Added navigation prop here
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // After successful registration, store user information in Firestore
       await setDoc(doc(FIRESTORE_DB, 'users', user.uid), {
         email: user.email,
         userId: user.uid,
@@ -41,8 +39,6 @@ const Login = ({ navigation }) => {  // Added navigation prop here
 
       console.log('User registered:', user.uid);
       alert('Registration successful');
-
-      navigation.navigate('HomeScreen', { userId: user.uid });  // Pass userId to HomeScreen
     } catch (error) {
       console.error(error);
       alert('Registration failed');
