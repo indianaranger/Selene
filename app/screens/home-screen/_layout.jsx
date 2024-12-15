@@ -23,6 +23,10 @@ function HomeStackLayout() {
         name="JournalEntry" 
         component={JournalEntryPage}
       />
+      <HomeStack.Screen 
+        name="TaskPage1" 
+        component={TaskPage1}
+      />
     </HomeStack.Navigator>
   );
 }
