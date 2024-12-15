@@ -1,40 +1,53 @@
-// screens/home-screen/HomeScreen.jsx
 import React from 'react';
 import { FIREBASE_AUTH } from '@/FirebaseConfig';
-import { View, Text, Button, StyleSheet,TouchableOpacity } from 'react-native';
+import { View, Text, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import CustomAppBar from './components/CustomAppbar';
 import JournalEntryButton from './components/JournalEntryButton';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const HomeScreen = ({navigation}) => {
   const user = FIREBASE_AUTH.currentUser;
-  const userId = user.uid;
+  const userId = user?.uid;
+
+  const handleLogout = async () => {
+    try {
+      await FIREBASE_AUTH.signOut();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+    } catch (error) {
+      Alert.alert('Error', 'Failed to log out. Please try again.');
+      console.error('Logout error:', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      
       <CustomAppBar/>
+      
+      {/* Logout Button */}
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={handleLogout}
+      >
+        <Icon name="logout" size={24} color="white" />
+      </TouchableOpacity>
+
       <TouchableOpacity
         style={[styles.floatingButton, styles.leftButton]}
         onPress={() => navigation.navigate('Calender')}
       >
         <Icon name="event" size={30} color="#fff"/>
       </TouchableOpacity>
+
       <JournalEntryButton/>
+
       <TouchableOpacity
         style={[styles.floatingButton, styles.rightButton]}
         onPress={() => console.log("Navigate to chatbot")}>
-         <Icon name="chat" size={24} color="white" />
+        <Icon name="chat" size={24} color="white" />
       </TouchableOpacity>
-
-      {/* <Button 
-        title="Go to Screen 1" 
-        onPress={() => navigation.navigate('Screen1')}
-      />
-      <Button 
-        title="Go to Screen 2" 
-        onPress={() => navigation.navigate('Screen2')}
-      /> */}
     </View>
   );
 };
@@ -47,23 +60,34 @@ const styles = StyleSheet.create({
   },
   floatingButton: {
     position: 'absolute',
-    bottom: 35, // Distance from the bottom of the screen
-    width: 50, // Button width
-    height: 50, // Button height
+    bottom: 35,
+    width: 50,
+    height: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 25, // Circular button
-    backgroundColor: 'teal', // Button color
-    elevation: 5, // Adds a shadow effect
+    borderRadius: 25,
+    backgroundColor: 'teal',
+    elevation: 5,
   },
   leftButton: {
-    left: '8%', // Positioned slightly to the left of the center
+    left: '8%',
   },
   rightButton: {
-    right: '8%', // Positioned slightly to the right of the center
+    right: '8%',
   },
- 
+  logoutButton: {
+    position: 'absolute',
+    top: 60,
+    right: 16,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    backgroundColor: 'teal',
+    elevation: 5,
+    zIndex: 1,
+  },
 });
-
 
 export default HomeScreen;
