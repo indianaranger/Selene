@@ -1,32 +1,63 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, TextInput, TouchableOpacity, View, FlatList, StyleSheet, Alert } from "react-native";
+import { FIRESTORE_DB, FIREBASE_AUTH } from '@/FirebaseConfig'; // Import firebaseConfig
+import { collection, addDoc, updateDoc, doc, deleteDoc, query, getDocs, where } from "firebase/firestore"; 
 
 const TaskPage1 = () => {
   const [tasks, setTasks] = useState([]);
   const [taskInput, setTaskInput] = useState("");
   const [editingTaskId, setEditingTaskId] = useState(null);
+  const userId = FIREBASE_AUTH.currentUser?.uid; // Get current user's UID
 
-  const addOrEditTask = () => {
+  // Fetch tasks from Firestore when the component mounts
+  useEffect(() => {
+    if (userId) {
+      const fetchTasks = async () => {
+        const q = query(collection(FIRESTORE_DB, "tasks"), where("userId", "==", userId));
+        const querySnapshot = await getDocs(q);
+        setTasks(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      };
+      fetchTasks();
+    }
+  }, [userId]);
+
+  // Add or edit task
+  const addOrEditTask = async () => {
     if (taskInput.trim()) {
       if (editingTaskId) {
-        setTasks(tasks.map(task => 
-          task.id === editingTaskId ? { ...task, task: taskInput } : task
-        ));
+        const taskRef = doc(FIRESTORE_DB, "tasks", editingTaskId);
+        await updateDoc(taskRef, { task: taskInput });
         setEditingTaskId(null);
       } else {
-        setTasks([...tasks, { id: Date.now(), task: taskInput }]);
+        await addDoc(collection(FIRESTORE_DB, "tasks"), {
+          task: taskInput,
+          userId: userId, // Associate task with the user
+        });
       }
       setTaskInput("");
+      loadTasks();
     }
   };
 
-  const removeTask = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+  // Remove task
+  const removeTask = async (id) => {
+    await deleteDoc(doc(FIRESTORE_DB, "tasks", id));
+    loadTasks();
   };
 
+  // Edit task
   const editTask = (id, taskText) => {
     setTaskInput(taskText);
     setEditingTaskId(id);
+  };
+
+  // Reload tasks after adding/removing
+  const loadTasks = async () => {
+    if (userId) {
+      const q = query(collection(FIRESTORE_DB, "tasks"), where("userId", "==", userId));
+      const querySnapshot = await getDocs(q);
+      setTasks(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }
   };
 
   return (
@@ -36,12 +67,12 @@ const TaskPage1 = () => {
         <TextInput
           style={styles.input}
           placeholder="What is the task today?"
-          placeholderTextColor="#6e6e6e" // Set placeholder text color to light black
+          placeholderTextColor="#6e6e6e"
           value={taskInput}
           onChangeText={setTaskInput}
-          multiline={true} // Set input to multiline
-          numberOfLines={4} // Set initial number of lines
-          textAlignVertical="top" // Align text to the top in multiline
+          multiline={true}
+          numberOfLines={4}
+          textAlignVertical="top"
         />
         <TouchableOpacity style={styles.addButton} onPress={addOrEditTask}>
           <Text style={styles.buttonText}>{editingTaskId ? "Edit" : "Add"}</Text>
@@ -71,14 +102,14 @@ const TaskPage1 = () => {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: "#d3d3d3", // Set background to light grey
+    backgroundColor: "#d3d3d3",
     padding: 20,
   },
   header: {
     fontSize: 24,
-    color: "#333", // Darker color for text
+    color: "#333",
     textAlign: "center",
-    marginBottom: 30, // Adjusted margin bottom for the header to move it slightly down
+    marginBottom: 30,
   },
   inputRow: {
     flexDirection: "row",
@@ -87,16 +118,16 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: "white", // Set background color to white for input box
+    backgroundColor: "white",
     borderWidth: 1,
-    borderColor: "#FFCC00", // Set border color of text input to light yellowish-orange
+    borderColor: "#FFCC00",
     padding: 10,
     borderRadius: 5,
-    color: "#333", // Darker text for input
+    color: "#333",
     marginRight: 10,
   },
   addButton: {
-    backgroundColor: "#008080", // Set background of the add button to teal
+    backgroundColor: "#008080",
     padding: 10,
     borderRadius: 5,
   },
@@ -105,19 +136,19 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   taskItem: {
-    flexDirection: "column", // Allow task content and buttons to stack vertically
-    backgroundColor: "#008080", // Set background color of task box to teal
+    flexDirection: "column",
+    backgroundColor: "#008080",
     padding: 10,
     borderRadius: 5,
     marginBottom: 10,
   },
   taskText: {
-    color: "#fff", // Set text color to white for tasks
+    color: "#fff",
     flex: 1,
     marginBottom: 10,
   },
   taskActions: {
-    flexDirection: "column", // Stack edit and delete buttons vertically
+    flexDirection: "column",
     alignItems: "center",
   },
   actionButton: {
@@ -133,4 +164,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TaskPage1;
+export default TaskPage1;
