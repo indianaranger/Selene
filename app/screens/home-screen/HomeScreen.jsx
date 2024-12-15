@@ -1,8 +1,10 @@
 // screens/home-screen/HomeScreen.jsx
 import React from 'react';
 import { FIREBASE_AUTH } from '@/FirebaseConfig';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet,TouchableOpacity } from 'react-native';
 import CustomAppBar from './components/CustomAppbar';
+import JournalEntryButton from './components/JournalEntryButton';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const HomeScreen = ({navigation}) => {
   const user = FIREBASE_AUTH.currentUser;
@@ -10,21 +12,29 @@ const HomeScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <Text>Welcome to Home Screen!</Text>
-      {userId ? (
-        <Text>Your User ID: {userId}</Text>
-      ) : (
-        <Text>No User ID found.</Text>
-      )}
+      
       <CustomAppBar/>
-      <Button 
+      <TouchableOpacity
+        style={[styles.floatingButton, styles.leftButton]}
+        onPress={() => navigation.navigate('Calender')}
+      >
+        <Icon name="event" size={30} color="#fff"/>
+      </TouchableOpacity>
+      <JournalEntryButton/>
+      <TouchableOpacity
+        style={[styles.floatingButton, styles.rightButton]}
+        onPress={() => console.log("Navigate to chatbot")}>
+         <Icon name="chat" size={24} color="white" />
+      </TouchableOpacity>
+
+      {/* <Button 
         title="Go to Screen 1" 
         onPress={() => navigation.navigate('Screen1')}
       />
       <Button 
         title="Go to Screen 2" 
         onPress={() => navigation.navigate('Screen2')}
-      />
+      /> */}
     </View>
   );
 };
