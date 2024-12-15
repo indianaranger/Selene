@@ -1,6 +1,14 @@
-// screens/Login.js
 import React, { useState } from 'react';
-import { View, TextInput, Button, ActivityIndicator, StyleSheet, KeyboardAvoidingView } from 'react-native';
+import { 
+  View, 
+  TextInput, 
+  Button, 
+  ActivityIndicator, 
+  StyleSheet, 
+  KeyboardAvoidingView,
+  Text,
+  TouchableOpacity
+} from 'react-native';
 import { FIREBASE_AUTH, FIRESTORE_DB } from '@/FirebaseConfig';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -8,7 +16,9 @@ import { doc, setDoc } from 'firebase/firestore';
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isLogin, setIsLogin] = useState(false);
 
   const auth = FIREBASE_AUTH;
 
@@ -27,6 +37,10 @@ const Login = ({ navigation }) => {
   };
 
   const signUp = async () => {
+    if (!name.trim()) {
+      alert('Please enter your name');
+      return;
+    }
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -34,6 +48,7 @@ const Login = ({ navigation }) => {
 
       await setDoc(doc(FIRESTORE_DB, 'users', user.uid), {
         email: user.email,
+        name: name.trim(),
         userId: user.uid,
       });
 
@@ -50,6 +65,15 @@ const Login = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView behavior="padding">
+        {!isLogin && (
+          <TextInput
+            style={styles.input}
+            value={name}
+            placeholder="Full Name"
+            autoCapitalize="words"
+            onChangeText={(text) => setName(text)}
+          />
+        )}
         <TextInput
           style={styles.input}
           value={email}
@@ -66,12 +90,24 @@ const Login = ({ navigation }) => {
           onChangeText={(text) => setPassword(text)}
         />
         {loading ? (
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color="#0000ff" />
         ) : (
-          <>
-            <Button title="Login" onPress={signIn} />
-            <Button title="Register" onPress={signUp} />
-          </>
+          <View style={styles.buttonContainer}>
+            <Button 
+              title={isLogin ? "Login" : "Create Account"} 
+              onPress={isLogin ? signIn : signUp}
+            />
+            <TouchableOpacity 
+              style={styles.switchButton} 
+              onPress={() => setIsLogin(!isLogin)}
+            >
+              <Text style={styles.switchText}>
+                {isLogin 
+                  ? "Don't have an account? Create one" 
+                  : "Already have an account? Login"}
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
       </KeyboardAvoidingView>
     </View>
@@ -92,6 +128,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     borderColor: '#ccc',
+  },
+  buttonContainer: {
+    width: '100%',
+    marginTop: 10,
+  },
+  switchButton: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  switchText: {
+    color: '#007AFF',
+    fontSize: 16,
   },
 });
 
